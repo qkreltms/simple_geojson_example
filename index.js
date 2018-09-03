@@ -23,7 +23,14 @@ mongoose.connect("mongodb://localhost/gpsTest")
     .catch(err => console.error(('Could not connect to MongoDB...\n'), err))
 
 const GeoSchema = new Schema({
-
+    type: {
+        type: String,
+        default: "Point",
+        index: '2dsphere'
+    },
+    coordinates: {
+        type: [Number]
+    }
 });
 
 const NinjaSchema = new Schema({
@@ -37,18 +44,9 @@ const NinjaSchema = new Schema({
         type: Boolean,
         default: false
     },
-    geometry: {
-        type: {
-            type: String,
-            default: "Point",
-            index: '2dsphere'
-        },
-        coordinates: {
-            type: [Number]
-        }
-    }
+    geometry: GeoSchema
 })
-NinjaSchema.index({geometry: '2dsphere'});
+// NinjaSchema.index({geometry: '2dsphere'});
 
 const Ninja = mongoose.model('ninja', NinjaSchema);
 
@@ -59,7 +57,7 @@ app.post('/ninjas', (req, res) => {
 })
 
 app.get('/ninjas', (req, res) => {
-    Ninja.find({}).where('').nearSphere({center: {
+    Ninja.find({}).where('geometry').nearSphere({center: {
         type: 'Point',
         coordinates : [parseFloat(req.query.lng), parseFloat(req.query.lat)],
         spherical: true
