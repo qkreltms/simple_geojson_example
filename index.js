@@ -1,11 +1,13 @@
 /*
-this one is for post request
+This one is for post request
 {
 	"name": "test",
 	"rank": "red belt",
 	"available": true,
 	"geometry" : {"type": "Point", "coordinates": [-80, 27]}
 }
+This one is for get request
+http://localhost:3030/ninjas?lng=-80&lat=20
 */
 
 const express = require('express');
