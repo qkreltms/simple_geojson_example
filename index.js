@@ -1,35 +1,71 @@
+/*
+this one is for post request
+{
+	"name": "test",
+	"rank": "red belt",
+	"available": true,
+	"geometry" : {"type": "Point", "coordinates": [-80, 27]}
+}
+*/
+
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
 app.use(bodyParser.json());
 
-const db =  mongoose.connect("mongodb://localhost/gpsTest")
-.then(() => console.log('Connected to MongoDB...'))
-.catch(err => console.error(('Could not connect to MongoDB...\n'), err))
+mongoose.connect("mongodb://localhost/gpsTest")
+    .then(() => console.log('Connected to MongoDB...'))
+    .catch(err => console.error(('Could not connect to MongoDB...\n'), err))
 
-const testSchema = new mongoose.Schema({
+const GeoSchema = new Schema({
+
+});
+
+const NinjaSchema = new Schema({
     name: {
-        type: String
+        type: String,
     },
-    location: {
+    rank: {
+        type: String,
+    },
+    available: {
+        type: Boolean,
+        default: false
+    },
+    geometry: {
         type: {
             type: String,
-            default: "Point"
+            default: "Point",
+            index: '2dsphere'
         },
-        coordinates: {type: [Number], default: [0,0]}
+        coordinates: {
+            type: [Number]
+        }
     }
-});
-const Test = mongoose.model('tests', testSchema);
-Test.create({
-    name: "test",
-    location: {
-        type: "point",
-        coordinates: [-123, 123]
-    }
-});
+})
+NinjaSchema.index({geometry: '2dsphere'});
 
+const Ninja = mongoose.model('ninja', NinjaSchema);
+
+app.post('/ninjas', (req, res) => {
+    Ninja.create(req.body).then(ninja => {
+        res.send(ninja);
+    })
+})
+
+app.get('/ninjas', (req, res) => {
+    Ninja.find({}).where('').nearSphere({center: {
+        type: 'Point',
+        coordinates : [parseFloat(req.query.lng), parseFloat(req.query.lat)],
+        spherical: true
+    }}
+    ).then(ninjas => {
+        res.send(ninjas);
+    });
+})
 app.listen(3030, () => {
     console.log(`listening port: 3030`);
 })
