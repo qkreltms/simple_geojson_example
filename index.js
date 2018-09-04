@@ -4,7 +4,7 @@ This one is for post request
 	"name": "test",
 	"rank": "red belt",
 	"available": true,
-	"geometry" : {"type": "Point", "coordinates": [-80, 27]}
+	"loc" : {"type": "Point", "coordinates": [-80, 27]}
 }
 This one is for get request
 http://localhost:3030/ninjas?lng=-80&lat=20
@@ -44,7 +44,7 @@ const NinjaSchema = new Schema({
         type: Boolean,
         default: false
     },
-    geometry: GeoSchema
+    loc: GeoSchema
 })
 // NinjaSchema.index({geometry: '2dsphere'});
 
@@ -57,7 +57,7 @@ app.post('/ninjas', (req, res) => {
 })
 
 app.get('/ninjas', (req, res) => {
-    Ninja.find({}).where('geometry').nearSphere({center: {
+    Ninja.find({}).where('loc').nearSphere({center: {
         type: 'Point',
         coordinates : [parseFloat(req.query.lng), parseFloat(req.query.lat)],
         spherical: true
